@@ -49,9 +49,10 @@ groundeffect-daemon status       # Check daemon status
 ## Uninstallation
 
 ```bash
-groundeffect-daemon setup --uninstall  # Remove launchd agent first
 brew uninstall groundeffect
 ```
+
+The launchd agent is automatically removed during uninstall.
 
 ## More Information
 
