@@ -27,15 +27,23 @@ This will:
 
 ## Usage
 
+GroundEffect is designed to be used through Claude Code's MCP integration. Once set up, ask Claude Code:
+
+```
+"Add my Gmail account to groundeffect"     # Add account with OAuth
+"Show my sync status"                       # Check sync progress
+"Search my emails for quarterly report"    # Semantic search
+"Show me my recent emails"                 # List recent messages
+"What meetings do I have tomorrow?"        # Calendar search
+```
+
+### CLI Commands (Alternative)
+
+The daemon can also be managed via CLI:
+
 ```bash
-# Add a Google account
-groundeffect-daemon add-account
-
-# Check daemon status
-groundeffect-daemon list-accounts
-
-# Change settings
-groundeffect-daemon configure
+groundeffect-daemon configure    # Change settings (logging, poll intervals, etc.)
+groundeffect-daemon status       # Check daemon status
 ```
 
 ## Uninstallation
