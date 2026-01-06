@@ -18,7 +18,14 @@ class Groundeffect < Formula
 
   def post_install
     # Restart daemon if it's running (e.g., after upgrade)
-    system "launchctl", "kickstart", "-k", "gui/#{Process.uid}/com.groundeffect.daemon" rescue nil
+    plist = Dir.home + "/Library/LaunchAgents/com.groundeffect.daemon.plist"
+    if File.exist?(plist)
+      # Try launchctl kickstart first
+      unless system "launchctl", "kickstart", "-k", "gui/#{Process.uid}/com.groundeffect.daemon"
+        # Fallback: kill the process and let launchd restart it (due to KeepAlive)
+        system "pkill", "-f", "groundeffect-daemon"
+      end
+    end
   end
 
   def caveats
