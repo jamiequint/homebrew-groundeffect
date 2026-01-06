@@ -1,13 +1,13 @@
 class Groundeffect < Formula
   desc "Hyper-fast, private email and calendar indexing for Claude Code"
   homepage "https://github.com/jamiequint/groundeffect"
-  version "0.1.9"
+  version "0.1.10"
   license "MIT"
 
   on_macos do
     if Hardware::CPU.arm?
-      url "https://github.com/jamiequint/groundeffect/releases/download/v0.1.9/groundeffect-0.1.9-darwin-arm64.tar.gz"
-      sha256 "efd00acc6aef1cd46f2470cd2cff8604c308c5b942c122fe8bf64d74a7f777f4"
+      url "https://github.com/jamiequint/groundeffect/releases/download/v0.1.10/groundeffect-0.1.10-darwin-arm64.tar.gz"
+      sha256 "82f7bbe58fd9a46310b4b37dadd84d23ace5ffb31fc397fb5731aa9dc5640670"
     end
   end
 
