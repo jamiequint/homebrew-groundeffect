@@ -1,13 +1,13 @@
 class Groundeffect < Formula
   desc "Hyper-fast, private email and calendar indexing for Claude Code"
   homepage "https://github.com/jamiequint/groundeffect"
-  version "0.2.0"
+  version "0.2.1"
   license "MIT"
 
   on_macos do
     if Hardware::CPU.arm?
-      url "https://github.com/jamiequint/groundeffect/releases/download/v0.2.0/groundeffect-0.2.0-darwin-arm64.tar.gz"
-      sha256 "a4987c44ce1372f1a49992dcf901b3d7e7753ddac89464bf214e67653bf89d1a"
+      url "https://github.com/jamiequint/groundeffect/releases/download/v0.2.1/groundeffect-0.2.1-darwin-arm64.tar.gz"
+      sha256 "4e57c348e7755aeb44e94f22246d5ef5f666a958c0283e40c9e5724b0b20b393"
     end
   end
 
@@ -40,15 +40,13 @@ class Groundeffect < Formula
          Then add to ~/.zshrc or ~/.bashrc:
          source ~/.secrets
 
-      2. Choose integration method for Claude Code:
+      2. Run the setup wizard:
+         groundeffect-daemon setup --install
 
-         OPTION A: Skill (Recommended - faster)
-         mkdir -p ~/.claude/skills
-         git clone https://github.com/jamiequint/groundeffect.git /tmp/groundeffect
-         cp -r /tmp/groundeffect/skill ~/.claude/skills/groundeffect
+      3. Allow Claude Code to run groundeffect commands:
+         groundeffect config add-permissions
 
-         OPTION B: MCP Server (for non-Claude Code users)
-         Add to ~/.claude.json:
+      4. (Alternative) For MCP-based integration, add to ~/.claude.json:
          {
            "mcpServers": {
              "groundeffect": {
@@ -62,13 +60,7 @@ class Groundeffect < Formula
            }
          }
 
-      3. Run the setup wizard:
-         groundeffect-daemon setup --install
-
-         Settings can be changed later with: groundeffect-daemon configure
-         Note: "Max concurrent fetches" = IMAP connections (Gmail limit: 15)
-
-      4. Add a Google account by asking Claude Code:
+      5. Add a Google account by asking Claude Code:
          "Add my Gmail account to groundeffect"
 
       Get OAuth credentials from: https://console.cloud.google.com/apis/credentials
