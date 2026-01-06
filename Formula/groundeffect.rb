@@ -1,17 +1,18 @@
 class Groundeffect < Formula
   desc "Hyper-fast, private email and calendar indexing for Claude Code"
   homepage "https://github.com/jamiequint/groundeffect"
-  version "0.1.10"
+  version "0.2.0"
   license "MIT"
 
   on_macos do
     if Hardware::CPU.arm?
-      url "https://github.com/jamiequint/groundeffect/releases/download/v0.1.10/groundeffect-0.1.10-darwin-arm64.tar.gz"
-      sha256 "82f7bbe58fd9a46310b4b37dadd84d23ace5ffb31fc397fb5731aa9dc5640670"
+      url "https://github.com/jamiequint/groundeffect/releases/download/v0.2.0/groundeffect-0.2.0-darwin-arm64.tar.gz"
+      sha256 "a4987c44ce1372f1a49992dcf901b3d7e7753ddac89464bf214e67653bf89d1a"
     end
   end
 
   def install
+    bin.install "groundeffect"
     bin.install "groundeffect-daemon"
     bin.install "groundeffect-mcp"
   end
@@ -39,7 +40,15 @@ class Groundeffect < Formula
          Then add to ~/.zshrc or ~/.bashrc:
          source ~/.secrets
 
-      2. Add MCP config to ~/.claude.json:
+      2. Choose integration method for Claude Code:
+
+         OPTION A: Skill (Recommended - faster)
+         mkdir -p ~/.claude/skills
+         git clone https://github.com/jamiequint/groundeffect.git /tmp/groundeffect
+         cp -r /tmp/groundeffect/skill ~/.claude/skills/groundeffect
+
+         OPTION B: MCP Server (for non-Claude Code users)
+         Add to ~/.claude.json:
          {
            "mcpServers": {
              "groundeffect": {
@@ -77,6 +86,7 @@ class Groundeffect < Formula
   end
 
   test do
+    assert_match "groundeffect", shell_output("#{bin}/groundeffect --help")
     assert_match "groundeffect-daemon", shell_output("#{bin}/groundeffect-daemon --help")
   end
 end
