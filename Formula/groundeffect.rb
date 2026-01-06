@@ -1,13 +1,13 @@
 class Groundeffect < Formula
   desc "Hyper-fast, private email and calendar indexing for Claude Code"
   homepage "https://github.com/jamiequint/groundeffect"
-  version "0.2.1"
+  version "0.3.0"
   license "MIT"
 
   on_macos do
     if Hardware::CPU.arm?
-      url "https://github.com/jamiequint/groundeffect/releases/download/v0.2.1/groundeffect-0.2.1-darwin-arm64.tar.gz"
-      sha256 "4e57c348e7755aeb44e94f22246d5ef5f666a958c0283e40c9e5724b0b20b393"
+      url "https://github.com/jamiequint/groundeffect/releases/download/v0.3.0/groundeffect-0.3.0-darwin-arm64.tar.gz"
+      sha256 "7aca8828131876a906dafab59fba38bb5eae9e0cb3d6af6eaf2ff649aff8f58d"
     end
   end
 
@@ -15,66 +15,62 @@ class Groundeffect < Formula
     bin.install "groundeffect"
     bin.install "groundeffect-daemon"
     bin.install "groundeffect-mcp"
+
+    # Install skill files to share directory
+    (share/"groundeffect/skill").install Dir["skill/*"] if Dir.exist?("skill")
   end
 
   def post_install
-    # Restart daemon if it's running (e.g., after upgrade)
-    plist = Dir.home + "/Library/LaunchAgents/com.groundeffect.daemon.plist"
-    if File.exist?(plist)
-      # Try launchctl kickstart first
-      unless system "launchctl", "kickstart", "-k", "gui/#{Process.uid}/com.groundeffect.daemon"
-        # Fallback: kill the process and let launchd restart it (due to KeepAlive)
-        system "pkill", "-f", "groundeffect-daemon"
-      end
+    require "fileutils"
+
+    plist_path = Dir.home + "/Library/LaunchAgents/com.groundeffect.daemon.plist"
+    skill_dest = Dir.home + "/.claude/skills/groundeffect"
+    skill_source = share/"groundeffect/skill"
+
+    # Install daemon (fresh install only)
+    unless File.exist?(plist_path)
+      system "#{bin}/groundeffect", "daemon", "install"
+    else
+      # Upgrade: restart existing daemon
+      system "launchctl", "kickstart", "-k", "gui/#{Process.uid}/com.groundeffect.daemon"
     end
+
+    # Copy skill files to ~/.claude/skills/groundeffect
+    if Dir.exist?(skill_source)
+      FileUtils.mkdir_p(skill_dest)
+      FileUtils.cp_r(Dir.glob("#{skill_source}/*"), skill_dest)
+    end
+
+    # Add Claude Code permissions
+    system "#{bin}/groundeffect", "config", "add-permissions"
   end
 
   def caveats
     <<~EOS
       To complete setup:
 
-      1. Create ~/.secrets with your Google OAuth credentials:
+      1. Add your Google OAuth credentials to ~/.zshrc or ~/.bashrc:
          export GROUNDEFFECT_GOOGLE_CLIENT_ID="your-client-id"
          export GROUNDEFFECT_GOOGLE_CLIENT_SECRET="your-client-secret"
 
-         Then add to ~/.zshrc or ~/.bashrc:
-         source ~/.secrets
+         Get credentials from: https://console.cloud.google.com/apis/credentials
+         (Create OAuth 2.0 Client ID > Desktop app, enable Gmail & Calendar APIs)
 
-      2. Run the setup wizard:
-         groundeffect-daemon setup --install
-
-      3. Allow Claude Code to run groundeffect commands:
-         groundeffect config add-permissions
-
-      4. (Alternative) For MCP-based integration, add to ~/.claude.json:
-         {
-           "mcpServers": {
-             "groundeffect": {
-               "type": "stdio",
-               "command": "groundeffect-mcp",
-               "env": {
-                 "GROUNDEFFECT_GOOGLE_CLIENT_ID": "${GROUNDEFFECT_GOOGLE_CLIENT_ID}",
-                 "GROUNDEFFECT_GOOGLE_CLIENT_SECRET": "${GROUNDEFFECT_GOOGLE_CLIENT_SECRET}"
-               }
-             }
-           }
-         }
-
-      5. Add a Google account by asking Claude Code:
-         "Add my Gmail account to groundeffect"
-
-      Get OAuth credentials from: https://console.cloud.google.com/apis/credentials
-      (Create OAuth 2.0 Client ID > Desktop app, enable Gmail & Calendar APIs)
+      2. Reload your shell and add an account:
+         source ~/.zshrc  # or restart terminal
+         groundeffect account add
     EOS
   end
 
   def uninstall_preflight
-    system "#{bin}/groundeffect-daemon", "setup", "--uninstall" rescue nil
+    system "#{bin}/groundeffect", "daemon", "uninstall" rescue nil
   end
 
   def post_uninstall
-    rm_rf Dir.home + "/.config/groundeffect"
-    rm_rf Dir.home + "/.local/share/groundeffect"
+    require "fileutils"
+    FileUtils.rm_rf(Dir.home + "/.config/groundeffect")
+    FileUtils.rm_rf(Dir.home + "/.local/share/groundeffect")
+    FileUtils.rm_rf(Dir.home + "/.claude/skills/groundeffect")
   end
 
   test do
