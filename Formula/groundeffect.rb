@@ -28,15 +28,18 @@ class Groundeffect < Formula
     skill_source = share/"groundeffect/skill"
 
     # Install or restart daemon
+    service_target = "gui/#{Process.uid}/com.groundeffect.daemon"
     unless File.exist?(plist_path)
       # Fresh install
       system "#{bin}/groundeffect", "daemon", "install"
     else
-      # Upgrade: try to restart, fall back to bootstrap if not loaded
-      service_id = "gui/#{Process.uid}/com.groundeffect.daemon"
-      # kickstart -k restarts if running, but fails if not loaded
-      # If kickstart fails, try bootstrap to load it
-      unless system "launchctl", "kickstart", "-k", service_id
+      # Check if service is loaded by looking for it in launchctl list
+      is_loaded = `launchctl print #{service_target} 2>&1`.include?("state =")
+      if is_loaded
+        # Service is loaded, restart it
+        system "launchctl", "kickstart", "-k", service_target
+      else
+        # Service not loaded, bootstrap it
         system "launchctl", "bootstrap", "gui/#{Process.uid}", plist_path
       end
     end
