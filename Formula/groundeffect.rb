@@ -28,20 +28,16 @@ class Groundeffect < Formula
     skill_source = share/"groundeffect/skill"
 
     # Install or restart daemon
+    # Use shell execution with error suppression since launchctl can return
+    # non-zero even on success, and daemon restart isn't critical
     service_target = "gui/#{Process.uid}/com.groundeffect.daemon"
     unless File.exist?(plist_path)
       # Fresh install
       system "#{bin}/groundeffect", "daemon", "install"
     else
-      # Check if service is loaded by looking for it in launchctl list
-      is_loaded = `launchctl print #{service_target} 2>&1`.include?("state =")
-      if is_loaded
-        # Service is loaded, restart it
-        system "launchctl", "kickstart", "-k", service_target
-      else
-        # Service not loaded, bootstrap it
-        system "launchctl", "bootstrap", "gui/#{Process.uid}", plist_path
-      end
+      # Try to restart daemon, ignoring any errors
+      # kickstart restarts if loaded, bootstrap loads if not
+      system "/bin/bash", "-c", "launchctl kickstart -k #{service_target} 2>/dev/null || launchctl bootstrap gui/#{Process.uid} '#{plist_path}' 2>/dev/null || true"
     end
 
     # Copy skill files to ~/.claude/skills/groundeffect
