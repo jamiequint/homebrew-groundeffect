@@ -1,13 +1,13 @@
 class Groundeffect < Formula
   desc "Hyper-fast, private email and calendar indexing for Claude Code"
   homepage "https://github.com/jamiequint/groundeffect"
-  version "0.3.5"
+  version "0.3.6"
   license "MIT"
 
   on_macos do
     if Hardware::CPU.arm?
-      url "https://github.com/jamiequint/groundeffect/releases/download/v0.3.5/groundeffect-0.3.5-darwin-arm64.tar.gz"
-      sha256 "7e644f5a5262450f84479af62e9ee7c5724320860f7972cc895d0698d854ee9b"
+      url "https://github.com/jamiequint/groundeffect/releases/download/v0.3.6/groundeffect-0.3.6-darwin-arm64.tar.gz"
+      sha256 "2ac9bf7734fcdc4ebb0dbd0ccd75e6e82a2198aea3bb8ccd707da456fe3f5142"
     end
   end
 
@@ -21,11 +21,7 @@ class Groundeffect < Formula
   end
 
   def post_install
-    require "fileutils"
-
     plist_path = Dir.home + "/Library/LaunchAgents/com.groundeffect.daemon.plist"
-    skill_dest = Dir.home + "/.claude/skills/groundeffect"
-    skill_source = share/"groundeffect/skill"
 
     # Install or restart daemon
     service_target = "gui/#{Process.uid}/com.groundeffect.daemon"
@@ -38,13 +34,7 @@ class Groundeffect < Formula
       `launchctl kickstart -k #{service_target} 2>&1` rescue nil
     end
 
-    # Copy skill files to ~/.claude/skills/groundeffect
-    # Use shell commands to bypass homebrew sandbox restrictions on user directories
-    if Dir.exist?(skill_source)
-      `rm -rf '#{skill_dest}' && mkdir -p '#{skill_dest}' && cp -R '#{skill_source}/'* '#{skill_dest}/'` rescue nil
-    end
-
-    # Add Claude Code permissions
+    # Add Claude Code permissions (also installs skill files)
     system "#{bin}/groundeffect", "config", "add-permissions"
   end
 
