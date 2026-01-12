@@ -54,6 +54,18 @@ brew uninstall groundeffect
 
 The launchd agent is automatically removed during uninstall.
 
+## Server Deployments
+
+The pre-built Homebrew binaries use file-based token storage, which is ideal for desktop use.
+
+For server deployments (e.g., Fly.io, Docker), groundeffect supports PostgreSQL token storage via the optional `postgres` feature. This requires building from source:
+
+```bash
+cargo build --release --features postgres
+```
+
+See the [main repository](https://github.com/jamiequint/groundeffect) for PostgreSQL configuration details.
+
 ## More Information
 
 See the [main repository](https://github.com/jamiequint/groundeffect) for full documentation.
